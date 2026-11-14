@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://d1e2f3g4h5j6"]
+
+[ext_resource type="Script" path="res://scripts/CastleBlock.gd" id="1_block"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(64, 32)
+
+[node name="CastleBlock" type="RigidBody2D"]
+collision_layer = 1
+collision_mask = 3
+mass = 3.5
+script = ExtResource("1_block")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_1")

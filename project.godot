@@ -8,6 +8,7 @@ config_version=5
 
 config/name="Tower Siege: Bullet Swarm"
 config/description="A 2D physics-based castle destruction game with multiplier gates and satisfying artillery swarms."
+run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 
 [display]

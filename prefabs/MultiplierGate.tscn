@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://b7v8c3d1f5g6"]
+
+[ext_resource type="Script" path="res://scripts/MultiplierGate.gd" id="1_gate"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(30, 130)
+
+[node name="MultiplierGate" type="Area2D"]
+collision_layer = 4
+collision_mask = 2
+script = ExtResource("1_gate")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_1")
