@@ -1,24 +1,24 @@
-[gd_scene load_steps=12 format=3 uid="uid://c4n3m7p8q2r1"]
+[gd_scene load_steps=11 format=3 uid="uid://c4n3m7p8q2r1"]
 
 [ext_resource type="Script" path="res://scripts/Main.gd" id="1_main"]
 [ext_resource type="Texture2D" path="res://assets/textures/background.png" id="2_bg"]
 [ext_resource type="Script" path="res://scripts/PlayerCastle.gd" id="3_player"]
-[ext_resource type="Texture2D" path="res://assets/textures/player_tank.png" id="4_ptank"]
-[ext_resource type="Texture2D" path="res://assets/textures/cannon_barrel.png" id="5_pbarrel"]
-[ext_resource type="Texture2D" path="res://assets/textures/muzzle_flash.png" id="6_flash"]
+[ext_resource type="Texture2D" path="res://assets/textures/player_mech.png" id="4_pmech"]
+[ext_resource type="Texture2D" path="res://assets/textures/muzzle_flash.png" id="5_flash"]
+[ext_resource type="Texture2D" path="res://assets/textures/spark.png" id="6_spark"]
 [ext_resource type="Script" path="res://scripts/EnemyCastle.gd" id="7_enemy"]
-[ext_resource type="Texture2D" path="res://assets/textures/enemy_tank.png" id="8_etank"]
+[ext_resource type="Texture2D" path="res://assets/textures/enemy_mech.png" id="8_emech"]
 [ext_resource type="PackedScene" path="res://prefabs/MultiplierGate.tscn" id="9_gate"]
 [ext_resource type="AudioStream" path="res://assets/audio/cannon_fire.wav" id="10_audio_cannon"]
 [ext_resource type="AudioStream" path="res://assets/audio/gate_chime.wav" id="11_audio_gate"]
 [ext_resource type="AudioStream" path="res://assets/audio/explosion.wav" id="12_audio_exp"]
 [ext_resource type="AudioStream" path="res://assets/audio/victory.wav" id="13_audio_vic"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
-size = Vector2(140, 110)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pmech"]
+size = Vector2(110, 150)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_enemy"]
-size = Vector2(160, 120)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_emech"]
+size = Vector2(110, 150)
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -44,48 +44,76 @@ collision_mask = 2
 script = ExtResource("3_player")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PlayerCastle"]
-position = Vector2(0, -50)
-shape = SubResource("RectangleShape2D_player")
+position = Vector2(0, -75)
+shape = SubResource("RectangleShape2D_pmech")
 
-[node name="ChassisSprite" type="Sprite2D" parent="PlayerCastle"]
-position = Vector2(0, -60)
-texture = ExtResource("4_ptank")
+[node name="MechSprite" type="Sprite2D" parent="PlayerCastle"]
+position = Vector2(0, -75)
+texture = ExtResource("4_pmech")
 
 [node name="CannonPivot" type="Node2D" parent="PlayerCastle"]
-position = Vector2(20, -50)
-
-[node name="BarrelSprite" type="Sprite2D" parent="PlayerCastle/CannonPivot"]
-position = Vector2(35, 0)
-texture = ExtResource("5_pbarrel")
+position = Vector2(25, -60)
 
 [node name="MuzzleFlash" type="Sprite2D" parent="PlayerCastle/CannonPivot"]
 visible = false
-position = Vector2(75, 0)
-scale = Vector2(0.7, 0.7)
-texture = ExtResource("6_flash")
+position = Vector2(65, 0)
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("5_flash")
+
+[node name="SparkParticles" type="CPUParticles2D" parent="PlayerCastle"]
+position = Vector2(-20, -50)
+emitting = false
+amount = 14
+lifetime = 0.6
+texture = ExtResource("6_spark")
+emission_shape = 1
+emission_sphere_radius = 8.0
+direction = Vector2(-1, -1)
+spread = 45.0
+gravity = Vector2(0, 350)
+initial_velocity_min = 60.0
+initial_velocity_max = 140.0
+scale_amount_min = 0.5
+scale_amount_max = 1.0
 
 [node name="MultiplierGate" parent="." instance=ExtResource("9_gate")]
 position = Vector2(630, 270)
 
 [node name="EnemyCastle" type="StaticBody2D" parent="."]
-position = Vector2(1070, 550)
+position = Vector2(1080, 560)
 collision_layer = 1
 collision_mask = 2
 script = ExtResource("7_enemy")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyCastle"]
-position = Vector2(0, -55)
-shape = SubResource("RectangleShape2D_enemy")
+position = Vector2(0, -75)
+shape = SubResource("RectangleShape2D_emech")
 
-[node name="ChassisSprite" type="Sprite2D" parent="EnemyCastle"]
-position = Vector2(0, -65)
-texture = ExtResource("8_etank")
+[node name="MechSprite" type="Sprite2D" parent="EnemyCastle"]
+position = Vector2(0, -75)
+texture = ExtResource("8_emech")
 
 [node name="MuzzleFlash" type="Sprite2D" parent="EnemyCastle"]
 visible = false
-position = Vector2(-80, -58)
+position = Vector2(-65, -55)
 scale = Vector2(0.8, 0.8)
-texture = ExtResource("6_flash")
+texture = ExtResource("5_flash")
+
+[node name="SparkParticles" type="CPUParticles2D" parent="EnemyCastle"]
+position = Vector2(20, -50)
+emitting = false
+amount = 14
+lifetime = 0.6
+texture = ExtResource("6_spark")
+emission_shape = 1
+emission_sphere_radius = 8.0
+direction = Vector2(1, -1)
+spread = 45.0
+gravity = Vector2(0, 350)
+initial_velocity_min = 60.0
+initial_velocity_max = 140.0
+scale_amount_min = 0.5
+scale_amount_max = 1.0
 
 [node name="Audio" type="Node" parent="."]
 
@@ -127,7 +155,7 @@ offset_right = 260.0
 offset_bottom = 35.0
 theme_override_font_sizes/font_size = 16
 theme_override_colors/font_color = Color(0.3, 1, 0.4, 1)
-text = "🛡️ YOUR CASTLE (HP)"
+text = "🛡️ PLAYER MECH TITAN (HP)"
 
 [node name="PlayerHPBar" type="ProgressBar" parent="UI/HUD/TopPanel"]
 layout_mode = 0
@@ -162,7 +190,7 @@ offset_right = 250.0
 offset_bottom = 75.0
 grow_horizontal = 2
 theme_override_font_sizes/font_size = 15
-text = "🎯 Drag & aim through the x20 gate!"
+text = "🎯 Drag & aim through the x5 gate!"
 horizontal_alignment = 1
 
 [node name="EnemyLabel" type="Label" parent="UI/HUD/TopPanel"]
@@ -177,7 +205,7 @@ offset_bottom = 35.0
 grow_horizontal = 0
 theme_override_font_sizes/font_size = 16
 theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
-text = "👹 CYBER-ENEMY BOSS (HP)"
+text = "🤖 ENEMY BOSS TITAN (HP)"
 horizontal_alignment = 2
 
 [node name="EnemyHPBar" type="ProgressBar" parent="UI/HUD/TopPanel"]
@@ -242,7 +270,7 @@ offset_top = 65.0
 offset_bottom = 95.0
 grow_horizontal = 2
 theme_override_font_sizes/font_size = 16
-text = "Enemy Boss Tank has been completely annihilated!"
+text = "Enemy Boss Titan has been completely destroyed!"
 horizontal_alignment = 1
 
 [node name="AdStatus" type="Label" parent="UI/VictoryPanel"]
@@ -324,7 +352,7 @@ offset_top = 65.0
 offset_bottom = 95.0
 grow_horizontal = 2
 theme_override_font_sizes/font_size = 16
-text = "Your castle was destroyed by the enemy barrage!"
+text = "Your Titan was crushed in battle!"
 horizontal_alignment = 1
 
 [node name="ReviveAdBtn" type="Button" parent="UI/DefeatPanel"]

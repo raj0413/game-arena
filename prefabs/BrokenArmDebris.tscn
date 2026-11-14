@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://k1j2h3g4f5d6"]
+
+[ext_resource type="Script" path="res://scripts/BrokenArmDebris.gd" id="1_debris"]
+[ext_resource type="Texture2D" path="res://assets/textures/broken_arm.png" id="2_tex"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_debris"]
+size = Vector2(28, 20)
+
+[node name="BrokenArmDebris" type="RigidBody2D"]
+z_index = 6
+collision_layer = 2
+collision_mask = 1
+mass = 2.0
+script = ExtResource("1_debris")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_debris")
