@@ -1,14 +1,39 @@
-[gd_scene load_steps=3 format=3 uid="uid://b7v8c3d1f5g6"]
+[gd_scene load_steps=4 format=3 uid="uid://b7v8c3d1f5g6"]
 
 [ext_resource type="Script" path="res://scripts/MultiplierGate.gd" id="1_gate"]
+[ext_resource type="Texture2D" path="res://assets/textures/multiplier_gate.png" id="2_ring"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
-size = Vector2(30, 130)
+size = Vector2(40, 140)
 
 [node name="MultiplierGate" type="Area2D"]
+z_index = 5
 collision_layer = 4
 collision_mask = 2
 script = ExtResource("1_gate")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_1")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_ring")
+
+[node name="Label" type="Label" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -20.0
+offset_right = 40.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(1, 0.95, 0.4, 1)
+theme_override_colors/font_outline_color = Color(0.2, 0.1, 0, 1)
+theme_override_constants/outline_size = 6
+text = "x15"
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://d1e2f3g4h5j6"]
+[gd_scene load_steps=4 format=3 uid="uid://d1e2f3g4h5j6"]
 
 [ext_resource type="Script" path="res://scripts/CastleBlock.gd" id="1_block"]
+[ext_resource type="Texture2D" path="res://assets/textures/stone_brick.png" id="2_brick"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(64, 32)
@@ -10,6 +11,9 @@ collision_layer = 1
 collision_mask = 3
 mass = 3.5
 script = ExtResource("1_block")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_brick")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_1")

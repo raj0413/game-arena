@@ -2,11 +2,12 @@ extends Node2D
 
 signal shot_fired()
 
-@export var max_power: float = 850.0
-@export var min_power: float = 250.0
-@export var power_scale: float = 3.5
+@export var max_power: float = 880.0
+@export var min_power: float = 260.0
+@export var power_scale: float = 3.6
 
 var projectile_scene: PackedScene = preload("res://prefabs/Cannonball.tscn")
+var tank_texture: Texture2D = preload("res://assets/textures/player_tank.png")
 
 var is_aiming: bool = false
 var drag_start: Vector2 = Vector2.ZERO
@@ -14,17 +15,22 @@ var current_drag: Vector2 = Vector2.ZERO
 var aim_angle: float = -0.55 # Radians (~30 degrees up)
 var current_power: float = 0.0
 
-var barrel_length: float = 45.0
-var barrel_origin: Vector2 = Vector2(10, -35)
+var barrel_origin: Vector2 = Vector2(40, -50)
+var barrel_length: float = 40.0
+var base_position_x: float = 0.0
 
 func _ready() -> void:
-	pass
+	base_position_x = position.x
+
+func _process(delta: float) -> void:
+	# Recoil recovery
+	if position.x < base_position_x:
+		position.x = move_toward(position.x, base_position_x, delta * 35.0)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
-				# Start aim if clicked in left side of screen
 				if event.position.x < 650:
 					is_aiming = true
 					drag_start = event.position
@@ -44,45 +50,40 @@ func _unhandled_input(event: InputEvent) -> void:
 		queue_redraw()
 
 func _draw() -> void:
-	# 1. Draw Castle Tank Base & Treads
-	# Treads
-	draw_rect(Rect2(-45, -8, 90, 16), Color(0.2, 0.2, 0.22), true)
-	# Wheels inside treads
-	for wx in [-30, -10, 10, 30]:
-		draw_circle(Vector2(wx, 0), 6.0, Color(0.4, 0.4, 0.45))
+	# 1. Draw Player Castle Tank HD Sprite
+	if tank_texture:
+		var tex_size = tank_texture.get_size()
+		# Draw centered horizontally, sitting on ground
+		draw_texture(tank_texture, Vector2(-tex_size.x * 0.5, -tex_size.y + 10))
 	
-	# Castle stone body
-	draw_rect(Rect2(-38, -48, 76, 40), Color(0.45, 0.45, 0.5), true)
-	draw_rect(Rect2(-38, -48, 76, 40), Color(0.25, 0.25, 0.3), false, 2.5)
-	
-	# Parapet crenels on top
-	draw_rect(Rect2(-38, -58, 18, 10), Color(0.4, 0.4, 0.45), true)
-	draw_rect(Rect2(20, -58, 18, 10), Color(0.4, 0.4, 0.45), true)
-	
-	# 2. Draw Cannon Barrel
+	# 2. Draw Cannon Barrel with Recoil
 	var barrel_end = barrel_origin + Vector2(cos(aim_angle), sin(aim_angle)) * barrel_length
-	draw_line(barrel_origin, barrel_end, Color(0.18, 0.18, 0.22), 12.0)
-	draw_circle(barrel_origin, 10.0, Color(0.3, 0.3, 0.35))
+	draw_line(barrel_origin, barrel_end, Color(0.2, 0.2, 0.24), 10.0)
+	draw_circle(barrel_origin, 8.0, Color(0.3, 0.3, 0.35))
 	
 	# 3. Draw Trajectory Prediction Arc when aiming
 	if is_aiming and current_power > min_power:
 		_draw_trajectory(barrel_end)
 
 func _draw_trajectory(start_pos: Vector2) -> void:
-	var gravity = Vector2(0, 980) # Project gravity
+	var gravity = Vector2(0, 980)
 	var velocity = Vector2(cos(aim_angle), sin(aim_angle)) * current_power
-	var time_step = 0.04
+	var time_step = 0.038
 	
-	var points_count = 22
+	var points_count = 24
 	for i in range(points_count):
 		var t = i * time_step
 		var next_pos = start_pos + velocity * t + 0.5 * gravity * t * t
-		var alpha = 1.0 - (float(i) / points_count) * 0.85
-		draw_circle(next_pos, 3.5, Color(1.0, 0.85, 0.2, alpha))
+		var alpha = 1.0 - (float(i) / points_count) * 0.8
+		var radius = lerp(4.5, 2.0, float(i) / points_count)
+		draw_circle(next_pos, radius, Color(1.0, 0.85, 0.2, alpha))
 
 func _fire_cannon() -> void:
 	if current_power < min_power:
 		return
+	
+	# Visual Recoil
+	position.x -= 12.0
 	
 	var projectile = projectile_scene.instantiate()
 	var spawn_pos = global_position + barrel_origin + Vector2(cos(aim_angle), sin(aim_angle)) * (barrel_length + 8.0)

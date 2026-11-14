@@ -3,7 +3,7 @@ extends Node2D
 signal health_changed(current_hp: float, max_hp: float)
 signal castle_destroyed()
 
-@export var max_health: float = 560.0
+@export var max_health: float = 600.0
 var current_health: float
 
 var block_scene: PackedScene = preload("res://prefabs/CastleBlock.tscn")
@@ -14,16 +14,11 @@ func _ready() -> void:
 	_build_castle()
 
 func _build_castle() -> void:
-	# Clear any previous children
 	for child in get_children():
 		child.queue_free()
 	active_blocks.clear()
 	
-	# Layout: 4 layers of stone blocks
-	# Layer 0 (Base): 2 blocks
-	# Layer 1: 2 blocks
-	# Layer 2: 2 blocks
-	# Layer 3 (Rooftop crenels): 2 blocks
+	# Build 4 rows of sturdy textured stone blocks
 	var block_w: float = 64.0
 	var block_h: float = 32.0
 	
@@ -36,7 +31,7 @@ func _build_castle() -> void:
 			add_child(block)
 			active_blocks.append(block)
 	
-	current_health = active_blocks.size() * 70.0
+	current_health = active_blocks.size() * 75.0
 	max_health = current_health
 	health_changed.emit(current_health, max_health)
 
