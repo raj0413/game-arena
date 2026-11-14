@@ -1,8 +1,8 @@
 extends Area2D
 
-@export var multiplier_factor: int = 15
+@export var multiplier_factor: int = 20
 @export var float_speed: float = 2.2
-@export var float_amplitude: float = 18.0
+@export var float_amplitude: float = 16.0
 
 var projectile_scene: PackedScene = preload("res://prefabs/Cannonball.tscn")
 
@@ -21,13 +21,19 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	time_elapsed += delta
 	position.y = initial_pos_y + sin(time_elapsed * float_speed) * float_amplitude
-	sprite.rotation = sin(time_elapsed * 1.5) * 0.05
+	sprite.rotation = sin(time_elapsed * 1.5) * 0.04
 	scale = scale.lerp(target_scale, delta * 4.0)
 
 func _on_body_entered(body: Node2D) -> void:
 	if "has_multiplied" in body and not body.has_multiplied:
 		body.has_multiplied = true
 		scale = Vector2(1.35, 1.35)
+		
+		# Play chime sound via Main
+		var main = get_tree().current_scene
+		if main and main.has_method("play_sound"):
+			main.play_sound("gate")
+			
 		_multiply_projectiles(body)
 
 func _multiply_projectiles(source: Node2D) -> void:
@@ -43,10 +49,10 @@ func _multiply_projectiles(source: Node2D) -> void:
 		child.set("is_enemy_shot", is_enemy)
 		child.set("damage", base_damage * 0.85)
 		
-		var angle_offset = deg_to_rad(randf_range(-15.0, 15.0))
+		var angle_offset = deg_to_rad(randf_range(-14.0, 14.0))
 		var speed_scale = randf_range(0.92, 1.08)
 		var spread_velocity = original_velocity.rotated(angle_offset) * speed_scale
 		
 		get_parent().call_deferred("add_child", child)
-		child.set_deferred("global_position", spawn_pos + Vector2(randf_range(-10, 10), randf_range(-14, 14)))
+		child.set_deferred("global_position", spawn_pos + Vector2(randf_range(-12, 12), randf_range(-16, 16)))
 		child.set_deferred("linear_velocity", spread_velocity)

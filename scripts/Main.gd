@@ -23,7 +23,13 @@ var current_state: TurnState = TurnState.PLAYER_AIM
 @onready var victory_panel: Panel = $UI/VictoryPanel
 @onready var defeat_panel: Panel = $UI/DefeatPanel
 
+@onready var sfx_cannon: AudioStreamPlayer = $Audio/SfxCannon
+@onready var sfx_gate: AudioStreamPlayer = $Audio/SfxGate
+@onready var sfx_explosion: AudioStreamPlayer = $Audio/SfxExplosion
+@onready var sfx_victory: AudioStreamPlayer = $Audio/SfxVictory
+
 var shake_intensity: float = 0.0
+var sfx_explosion_cooldown: float = 0.0
 
 func _ready() -> void:
 	player_castle.connect("shot_fired", _on_player_shot_fired)
@@ -54,6 +60,9 @@ func _process(delta: float) -> void:
 	else:
 		camera.offset = Vector2.ZERO
 		
+	if sfx_explosion_cooldown > 0.0:
+		sfx_explosion_cooldown -= delta
+		
 	# Check projectile flying completion
 	if current_state == TurnState.PLAYER_FIRING:
 		if _get_active_projectiles_count() == 0:
@@ -64,6 +73,19 @@ func _process(delta: float) -> void:
 
 func trigger_shake(amount: float) -> void:
 	shake_intensity = clamp(shake_intensity + amount, 0.0, 16.0)
+
+func play_sound(sfx_name: String) -> void:
+	match sfx_name:
+		"cannon":
+			if sfx_cannon: sfx_cannon.play()
+		"gate":
+			if sfx_gate: sfx_gate.play()
+		"explosion":
+			if sfx_explosion and sfx_explosion_cooldown <= 0.0:
+				sfx_explosion.play()
+				sfx_explosion_cooldown = 0.08 # prevent audio overload
+		"victory":
+			if sfx_victory: sfx_victory.play()
 
 func _setup_terrain_collision() -> void:
 	var hill_points = PackedVector2Array([
@@ -89,7 +111,7 @@ func _set_turn(new_state: TurnState) -> void:
 			player_castle.can_aim = true
 			turn_indicator.text = "🟢 YOUR TURN"
 			turn_indicator.modulate = Color(0.3, 1.0, 0.4)
-			status_label.text = "🎯 Drag & aim through the x15 gate!"
+			status_label.text = "🎯 Drag & aim through the x20 gate!"
 			
 		TurnState.PLAYER_FIRING:
 			player_castle.can_aim = false
@@ -102,8 +124,7 @@ func _set_turn(new_state: TurnState) -> void:
 			turn_indicator.text = "🔴 ENEMY AI TURN"
 			turn_indicator.modulate = Color(1.0, 0.3, 0.3)
 			status_label.text = "🤖 Enemy AI is calculating trajectory..."
-			# Delay 0.8s then execute AI aim
-			await get_tree().create_timer(0.8).timeout
+			await get_tree().create_timer(0.9).timeout
 			if current_state == TurnState.AI_AIM:
 				enemy_castle.execute_ai_turn(multiplier_gate.global_position, player_castle.global_position)
 				
@@ -113,14 +134,15 @@ func _set_turn(new_state: TurnState) -> void:
 			status_label.text = "Brace for impact!"
 
 func _on_player_shot_fired() -> void:
+	play_sound("cannon")
 	trigger_shake(5.0)
-	# Wait a small moment to ensure projectiles spawned
-	await get_tree().create_timer(0.2).timeout
+	await get_tree().create_timer(0.25).timeout
 	current_state = TurnState.PLAYER_FIRING
 
 func _on_ai_shot_fired() -> void:
+	play_sound("cannon")
 	trigger_shake(5.0)
-	await get_tree().create_timer(0.2).timeout
+	await get_tree().create_timer(0.25).timeout
 	current_state = TurnState.AI_FIRING
 
 func _get_active_projectiles_count() -> int:
@@ -138,6 +160,7 @@ func _on_enemy_health_changed(current_hp: float, max_hp: float) -> void:
 
 func _on_enemy_defeated() -> void:
 	current_state = TurnState.GAME_OVER
+	play_sound("victory")
 	trigger_shake(16.0)
 	victory_panel.visible = true
 	turn_indicator.text = "👑 VICTORY!"
@@ -153,7 +176,6 @@ func _on_victory_ad_pressed() -> void:
 	trigger_shake(8.0)
 
 func _on_revive_ad_pressed() -> void:
-	# Revive player with 50% HP
 	defeat_panel.visible = false
 	player_castle.current_health = player_castle.max_health * 0.5
 	player_castle.health_changed.emit(player_castle.current_health, player_castle.max_health)

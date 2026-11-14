@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://c4n3m7p8q2r1"]
+[gd_scene load_steps=12 format=3 uid="uid://c4n3m7p8q2r1"]
 
 [ext_resource type="Script" path="res://scripts/Main.gd" id="1_main"]
 [ext_resource type="Texture2D" path="res://assets/textures/background.png" id="2_bg"]
@@ -8,14 +8,17 @@
 [ext_resource type="Texture2D" path="res://assets/textures/muzzle_flash.png" id="6_flash"]
 [ext_resource type="Script" path="res://scripts/EnemyCastle.gd" id="7_enemy"]
 [ext_resource type="Texture2D" path="res://assets/textures/enemy_tank.png" id="8_etank"]
-[ext_resource type="Texture2D" path="res://assets/textures/enemy_cannon_barrel.png" id="9_ebarrel"]
-[ext_resource type="PackedScene" path="res://prefabs/MultiplierGate.tscn" id="10_gate"]
+[ext_resource type="PackedScene" path="res://prefabs/MultiplierGate.tscn" id="9_gate"]
+[ext_resource type="AudioStream" path="res://assets/audio/cannon_fire.wav" id="10_audio_cannon"]
+[ext_resource type="AudioStream" path="res://assets/audio/gate_chime.wav" id="11_audio_gate"]
+[ext_resource type="AudioStream" path="res://assets/audio/explosion.wav" id="12_audio_exp"]
+[ext_resource type="AudioStream" path="res://assets/audio/victory.wav" id="13_audio_vic"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
-size = Vector2(130, 90)
+size = Vector2(140, 110)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_enemy"]
-size = Vector2(130, 90)
+size = Vector2(160, 120)
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -35,61 +38,68 @@ collision_mask = 3
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Terrain"]
 
 [node name="PlayerCastle" type="StaticBody2D" parent="."]
-position = Vector2(170, 570)
+position = Vector2(180, 560)
 collision_layer = 1
 collision_mask = 2
 script = ExtResource("3_player")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PlayerCastle"]
-position = Vector2(0, -45)
+position = Vector2(0, -50)
 shape = SubResource("RectangleShape2D_player")
 
 [node name="ChassisSprite" type="Sprite2D" parent="PlayerCastle"]
-position = Vector2(0, -55)
+position = Vector2(0, -60)
 texture = ExtResource("4_ptank")
 
 [node name="CannonPivot" type="Node2D" parent="PlayerCastle"]
-position = Vector2(12, -52)
+position = Vector2(20, -50)
 
 [node name="BarrelSprite" type="Sprite2D" parent="PlayerCastle/CannonPivot"]
-position = Vector2(24, 0)
+position = Vector2(35, 0)
 texture = ExtResource("5_pbarrel")
 
 [node name="MuzzleFlash" type="Sprite2D" parent="PlayerCastle/CannonPivot"]
 visible = false
-position = Vector2(55, 0)
+position = Vector2(75, 0)
 scale = Vector2(0.7, 0.7)
 texture = ExtResource("6_flash")
 
-[node name="MultiplierGate" parent="." instance=ExtResource("10_gate")]
-position = Vector2(630, 290)
+[node name="MultiplierGate" parent="." instance=ExtResource("9_gate")]
+position = Vector2(630, 270)
 
 [node name="EnemyCastle" type="StaticBody2D" parent="."]
-position = Vector2(1070, 570)
+position = Vector2(1070, 550)
 collision_layer = 1
 collision_mask = 2
 script = ExtResource("7_enemy")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyCastle"]
-position = Vector2(0, -45)
+position = Vector2(0, -55)
 shape = SubResource("RectangleShape2D_enemy")
 
 [node name="ChassisSprite" type="Sprite2D" parent="EnemyCastle"]
-position = Vector2(0, -50)
+position = Vector2(0, -65)
 texture = ExtResource("8_etank")
 
-[node name="CannonPivot" type="Node2D" parent="EnemyCastle"]
-position = Vector2(-15, -45)
-
-[node name="BarrelSprite" type="Sprite2D" parent="EnemyCastle/CannonPivot"]
-position = Vector2(-24, 0)
-texture = ExtResource("9_ebarrel")
-
-[node name="MuzzleFlash" type="Sprite2D" parent="EnemyCastle/CannonPivot"]
+[node name="MuzzleFlash" type="Sprite2D" parent="EnemyCastle"]
 visible = false
-position = Vector2(-55, 0)
-scale = Vector2(0.7, 0.7)
+position = Vector2(-80, -58)
+scale = Vector2(0.8, 0.8)
 texture = ExtResource("6_flash")
+
+[node name="Audio" type="Node" parent="."]
+
+[node name="SfxCannon" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("10_audio_cannon")
+
+[node name="SfxGate" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("11_audio_gate")
+
+[node name="SfxExplosion" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("12_audio_exp")
+
+[node name="SfxVictory" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("13_audio_vic")
 
 [node name="UI" type="CanvasLayer" parent="."]
 
@@ -152,7 +162,7 @@ offset_right = 250.0
 offset_bottom = 75.0
 grow_horizontal = 2
 theme_override_font_sizes/font_size = 15
-text = "🎯 Drag & aim through the x15 gate!"
+text = "🎯 Drag & aim through the x20 gate!"
 horizontal_alignment = 1
 
 [node name="EnemyLabel" type="Label" parent="UI/HUD/TopPanel"]
@@ -167,7 +177,7 @@ offset_bottom = 35.0
 grow_horizontal = 0
 theme_override_font_sizes/font_size = 16
 theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
-text = "🤖 CYBER-ENEMY BOSS (HP)"
+text = "👹 CYBER-ENEMY BOSS (HP)"
 horizontal_alignment = 2
 
 [node name="EnemyHPBar" type="ProgressBar" parent="UI/HUD/TopPanel"]

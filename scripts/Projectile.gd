@@ -20,7 +20,6 @@ func _ready() -> void:
 		scale = Vector2(0.85, 0.85)
 		
 	if is_enemy_shot:
-		# Purple/Crimson tint for enemy projectiles
 		sprite.modulate = Color(1.0, 0.35, 0.6)
 	
 	get_tree().create_timer(lifetime).timeout.connect(queue_free)
@@ -32,9 +31,6 @@ func _physics_process(_delta: float) -> void:
 func _on_body_entered(body: Node) -> void:
 	_spawn_impact_fx()
 	
-	# Determine friendly fire:
-	# If player shot -> damage enemy
-	# If enemy shot -> damage player
 	var can_damage: bool = false
 	if is_enemy_shot and body.name == "PlayerCastle":
 		can_damage = true
@@ -57,8 +53,11 @@ func _spawn_impact_fx() -> void:
 	explosion.set_deferred("global_position", global_position)
 	
 	var main = get_tree().current_scene
-	if main and main.has_method("trigger_shake"):
-		main.trigger_shake(4.0 if is_child_swarm else 8.0)
+	if main:
+		if main.has_method("trigger_shake"):
+			main.trigger_shake(3.5 if is_child_swarm else 7.5)
+		if main.has_method("play_sound"):
+			main.play_sound("explosion")
 
 func _spawn_damage_popup(amount: float, is_crit: bool) -> void:
 	var popup = popup_scene.instantiate()

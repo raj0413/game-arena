@@ -4,30 +4,27 @@ signal health_changed(current_hp: float, max_hp: float)
 signal castle_destroyed()
 signal ai_shot_fired()
 
-@export var max_health: float = 550.0
-var current_health: float = 550.0
+@export var max_health: float = 600.0
+var current_health: float = 600.0
 
 var projectile_scene: PackedScene = preload("res://prefabs/Cannonball.tscn")
 
 @onready var chassis_sprite: Sprite2D = $ChassisSprite
-@onready var cannon_pivot: Node2D = $CannonPivot
-@onready var barrel_sprite: Sprite2D = $CannonPivot/BarrelSprite
-@onready var muzzle_flash: Sprite2D = $CannonPivot/MuzzleFlash
+@onready var muzzle_flash: Sprite2D = $MuzzleFlash
 
-var base_pivot_x: float = -15.0
+var base_pos_x: float = 0.0
 var flash_timer: float = 0.0
 
 func _ready() -> void:
 	current_health = max_health
-	cannon_pivot.position = Vector2(base_pivot_x, -45)
-	cannon_pivot.rotation = -2.6 # ~30 deg up facing left
+	base_pos_x = position.x
 	muzzle_flash.visible = false
 	health_changed.emit(current_health, max_health)
 
 func _process(delta: float) -> void:
 	# Recoil recovery
-	if cannon_pivot.position.x > base_pivot_x:
-		cannon_pivot.position.x = move_toward(cannon_pivot.position.x, base_pivot_x, delta * 45.0)
+	if position.x > base_pos_x:
+		position.x = move_toward(position.x, base_pos_x, delta * 35.0)
 		
 	if flash_timer > 0.0:
 		flash_timer -= delta
@@ -35,29 +32,27 @@ func _process(delta: float) -> void:
 			muzzle_flash.visible = false
 
 func execute_ai_turn(gate_pos: Vector2, player_pos: Vector2) -> void:
-	# Calculate aim angle towards the multiplier gate with slight random variation
-	var target_spot = gate_pos + Vector2(randf_range(-15, 15), randf_range(-20, 20))
-	var aim_dir = (target_spot - cannon_pivot.global_position).normalized()
-	var target_angle = clamp(aim_dir.angle(), -2.9, -1.8)
+	# AI targeting towards the multiplier gate
+	await get_tree().create_timer(0.6).timeout
 	
-	# Smoothly rotate cannon barrel over 1.0s to simulate AI aiming
-	var tween = create_tween()
-	tween.tween_property(cannon_pivot, "rotation", target_angle, 1.0).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	await tween.finished
-	
-	# Pause 0.3s before firing
-	await get_tree().create_timer(0.3).timeout
-	_fire_ai_cannon(target_angle)
-
-func _fire_ai_cannon(angle: float) -> void:
-	cannon_pivot.position.x = base_pivot_x + 14.0 # Recoil backward
+	# Recoil kick backward (to the right)
+	position.x = base_pos_x + 14.0
 	muzzle_flash.visible = true
-	flash_timer = 0.14
+	flash_timer = 0.15
 	
 	var projectile = projectile_scene.instantiate()
-	var spawn_pos = cannon_pivot.global_position + Vector2(cos(angle), sin(angle)) * 55.0
-	var power = randf_range(680.0, 780.0)
-	var velocity = Vector2(cos(angle), sin(angle)) * power
+	# Muzzle tip position on the enemy boss tank
+	var spawn_pos = global_position + Vector2(-80, -58)
+	
+	# Aim vector through the floating multiplier gate
+	var target = gate_pos + Vector2(randf_range(-15, 15), randf_range(-10, 10))
+	var aim_dir = (target - spawn_pos).normalized()
+	# Give it a nice upward parabolic arc
+	aim_dir.y -= 0.28
+	aim_dir = aim_dir.normalized()
+	
+	var power = randf_range(680.0, 760.0)
+	var velocity = aim_dir * power
 	
 	projectile.set("is_enemy_shot", true)
 	get_parent().add_child(projectile)
@@ -81,4 +76,4 @@ func reset() -> void:
 	current_health = max_health
 	health_changed.emit(current_health, max_health)
 	chassis_sprite.modulate = Color(1.0, 1.0, 1.0)
-	cannon_pivot.rotation = -2.6
+	position.x = base_pos_x
